@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="AntiGravity Core v1.0 — Carbon-aware workload scheduler for AMD EPYC and Instinct hardware">
+  <title>AntiGravity Core v1.0 — AMD Scheduler</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div class="app">
+
+    <header class="header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+        </div>
+        <div>
+          <div class="brand-name">AntiGravity Core</div>
+          <div class="brand-tag">AMD EPYC &amp; Instinct Scheduler</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="status-indicator">
+          <span class="dot"></span>
+          <span id="engine-status">Active</span>
+        </div>
+        <button class="theme-toggle" id="btn-theme" title="Toggle theme">
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+          </svg>
+        </button>
+        <button class="btn btn-ghost" id="btn-add-job">Add Job</button>
+        <button class="btn btn-primary" id="btn-decide">Run Decision</button>
+      </div>
+    </header>
+
+    <div class="grid">
+
+      <!-- Carbon -->
+      <div class="card" id="card-carbon">
+        <div class="card-head">
+          <div class="card-head-left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M12 2a10 10 0 1 0 10 10" />
+              <path d="M12 8v4l3 3" />
+            </svg>
+            <span class="card-label">Carbon Intensity</span>
+          </div>
+          <span class="tag tag-amber" id="carbon-badge">MODERATE</span>
+        </div>
+        <div class="card-body">
+          <div class="metrics-row">
+            <div class="metric">
+              <div class="metric-val amber" id="carbon-current">--</div>
+              <div class="metric-desc">Current gCO₂</div>
+            </div>
+            <div class="metric">
+              <div class="metric-val green" id="carbon-forecast-min">--</div>
+              <div class="metric-desc">Forecast Min</div>
+            </div>
+            <div class="metric">
+              <div class="metric-val muted" id="carbon-delta">--</div>
+              <div class="metric-desc">Delta</div>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="forecast-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Telemetry -->
+      <div class="card" id="card-telemetry">
+        <div class="card-head">
+          <div class="card-head-left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <rect x="4" y="4" width="16" height="16" rx="2" />
+              <path d="M9 9h6v6H9z" />
+              <path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3" />
+            </svg>
+            <span class="card-label">Hardware Telemetry</span>
+          </div>
+          <span class="tag tag-muted" id="telemetry-badge">MI300X</span>
+        </div>
+        <div class="card-body">
+          <div class="telemetry-items">
+            <div class="tl-item">
+              <div class="tl-row">
+                <span class="tl-label">Power</span>
+                <span class="tl-val" id="telem-watts">--W</span>
+              </div>
+              <div class="bar">
+                <div class="bar-fill blue" id="bar-watts" style="width:0%"></div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-row">
+                <span class="tl-label">Temp</span>
+                <span class="tl-val" id="telem-temp">--°C</span>
+              </div>
+              <div class="bar">
+                <div class="bar-fill amber" id="bar-temp" style="width:0%"></div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-row">
+                <span class="tl-label">TDP Cap</span>
+                <span class="tl-val" id="telem-tdp">--W</span>
+              </div>
+              <div class="bar">
+                <div class="bar-fill green" id="bar-tdp" style="width:0%"></div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-row">
+                <span class="tl-label">VRAM</span>
+                <span class="tl-val" id="telem-vram">--GB</span>
+              </div>
+              <div class="bar">
+                <div class="bar-fill purple" id="bar-vram" style="width:0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Queue -->
+      <div class="card" id="card-queue">
+        <div class="card-head">
+          <div class="card-head-left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8Z" />
+              <path d="M15 3v4a2 2 0 0 0 2 2h4" />
+            </svg>
+            <span class="card-label">Job Queue</span>
+          </div>
+          <span class="tag tag-muted" id="queue-count">0 jobs</span>
+        </div>
+        <div class="queue-scroll">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>Task ID</th>
+                <th>Priority</th>
+                <th>VRAM</th>
+                <th>Deadline</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="queue-body">
+              <tr>
+                <td colspan="5" class="empty-state">Loading…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Decisions -->
+      <div class="card" id="card-decisions">
+        <div class="card-head">
+          <div class="card-head-left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+            <span class="card-label">Decision Log</span>
+          </div>
+          <span class="tag tag-muted" id="decision-count">0</span>
+        </div>
+        <div class="log-scroll" id="decision-log">
+          <div class="empty-state">Run a decision cycle to see results here.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-bg" id="modal-overlay">
+    <div class="modal">
+      <div class="modal-head">Add Job</div>
+      <div class="modal-body">
+        <div class="field">
+          <label for="job-id">Task ID</label>
+          <input type="text" id="job-id" placeholder="e.g. LLM-TRAIN-70B">
+        </div>
+        <div class="field">
+          <label for="job-priority">Priority (1 = highest)</label>
+          <input type="number" id="job-priority" min="1" max="10" value="5">
+        </div>
+        <div class="field">
+          <label for="job-vram">VRAM Required (GB)</label>
+          <input type="number" id="job-vram" min="0" max="192" value="16">
+        </div>
+        <div class="field">
+          <label for="job-deadline">Deadline (hours from now)</label>
+          <input type="number" id="job-deadline" min="0.5" max="72" step="0.5" value="4">
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" id="btn-cancel-modal">Cancel</button>
+        <button class="btn btn-primary" id="btn-submit-job">Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>

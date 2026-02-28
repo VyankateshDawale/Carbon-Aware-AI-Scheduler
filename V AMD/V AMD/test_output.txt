@@ -1,0 +1,37 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0 -- C:\Program Files\Python314\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Aditya\OneDrive\Desktop\V AMD
+collecting ... collected 22 items
+
+tests/test_scheduler.py::TestCarbonAnalyzer::test_classify_high PASSED   [  4%]
+tests/test_scheduler.py::TestCarbonAnalyzer::test_classify_low PASSED    [  9%]
+tests/test_scheduler.py::TestCarbonAnalyzer::test_classify_moderate PASSED [ 13%]
+tests/test_scheduler.py::TestCarbonAnalyzer::test_analyze_delta_with_forecast PASSED [ 18%]
+tests/test_scheduler.py::TestCarbonAnalyzer::test_analyze_delta_no_forecast PASSED [ 22%]
+tests/test_scheduler.py::TestTelemetry::test_failsafe_defaults PASSED    [ 27%]
+tests/test_scheduler.py::TestTelemetry::test_clamp_clock_ceiling PASSED  [ 31%]
+tests/test_scheduler.py::TestTelemetry::test_clamp_tdp_ceiling PASSED    [ 36%]
+tests/test_scheduler.py::TestTelemetry::test_clamp_negative PASSED       [ 40%]
+tests/test_scheduler.py::TestTelemetry::test_vram_free PASSED            [ 45%]
+tests/test_scheduler.py::TestJobQueue::test_add_and_get PASSED           [ 50%]
+tests/test_scheduler.py::TestJobQueue::test_vram_overflow_rejected PASSED [ 54%]
+tests/test_scheduler.py::TestJobQueue::test_priority_ordering PASSED     [ 59%]
+tests/test_scheduler.py::TestJobQueue::test_next_job_vram_filter PASSED  [ 63%]
+tests/test_scheduler.py::TestScheduler::test_high_carbon_caps_tdp PASSED [ 68%]
+tests/test_scheduler.py::TestScheduler::test_low_carbon_pbo PASSED       [ 72%]
+tests/test_scheduler.py::TestScheduler::test_vram_overflow_defers FAILED [ 77%]
+tests/test_scheduler.py::TestScheduler::test_missing_telemetry_failsafe PASSED [ 81%]
+tests/test_scheduler.py::TestScheduler::test_no_eligible_task PASSED     [ 86%]
+tests/test_scheduler.py::TestScheduler::test_output_schema PASSED        [ 90%]
+tests/test_scheduler.py::TestScheduler::test_physical_boundary_tdp PASSED [ 95%]
+tests/test_scheduler.py::TestScheduler::test_history_appended PASSED     [100%]
+
+================================== FAILURES ===================================
+___________________ TestScheduler.test_vram_overflow_defers ___________________
+tests\test_scheduler.py:171: in test_vram_overflow_defers
+    assert "VRAM_OVERFLOW" in result["error_flags"]
+E   AssertionError: assert 'VRAM_OVERFLOW' in 'NO_ELIGIBLE_TASK'
+=========================== short test summary info ===========================
+FAILED tests/test_scheduler.py::TestScheduler::test_vram_overflow_defers - As...
+======================== 1 failed, 21 passed in 0.07s =========================
